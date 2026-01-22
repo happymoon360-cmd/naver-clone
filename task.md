@@ -1,0 +1,27 @@
+# Naver Blog Clone Task List
+
+- [x] **Project Setup**
+    - [x] Initialize Next.js Project (TypeScript, Tailwind, App Router)
+    - [ ] Initialize GitHub Repository & .gitignore
+    - [ ] Setup Vercel Deployment & GitHub Integration
+    - [ ] Configure Environment Variables (.env)
+- [ ] **Database & Backend**
+    - [ ] Setup Prisma + SQLite (Local) / Postgres (Prod)
+    - [ ] Define Schema (Post, Comment, Like - with admin overrides)
+    - [ ] Base API Routes (Posts CRUD)
+- [ ] **Advanced Features (User Manipulation)**
+    - [ ] **Admin API**: Manual View Count Set (`PUT /api/posts/[id]/views`)
+    - [ ] **Admin API**: Manual Like Count Set (`PUT /api/posts/[id]/likes`)
+    - [ ] **Comment System**:
+        - [ ] Write as arbitrary "Author Name" (Identity spoofing for admin)
+        - [ ] Comment Edit/Delete API
+    - [ ] **Admin Dashboard** (`/admin`): UI to manage posts and manipulate stats
+- [ ] **UI Implementation (Clone)**
+    - [ ] Global Layout (Header/GNB - No Naver Logo, Sidebar)
+    - [ ] Component Architecture (`components/layout`, `components/blog`, `components/ui`)
+    - [ ] **Main Page**: Profile, Category List, Post List
+    - [ ] **Post Detail**: Content, Custom Like Button, Comment Section
+    - [ ] **Mobile Responsiveness**
+- [ ] **Verification**
+    - [ ] Test "User Manipulation" flows
+    - [ ] Verify Vercel Deployment

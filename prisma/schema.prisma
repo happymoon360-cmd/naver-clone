@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  viewCount Int       @default(0)
+  likeCount Int       @default(0)
+  category  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[]
+}
+
+model Comment {
+  id         Int       @id @default(autoincrement())
+  postId     Int
+  post       Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorName String
+  authorIcon String?
+  content    String
+  parentId   Int?      // For nested replies (one level deep or recursive)
+  createdAt  DateTime  @default(now())
+}
