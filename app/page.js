@@ -1,45 +1,41 @@
 'use client';
-import MobileHeader from '@/src/components/mobile/MobileHeader';
-import PostFooter from '@/src/components/mobile/PostFooter';
-import CommentSection from '@/src/components/comment/CommentSection';
-import Footer from '@/src/components/Footer';
+import MobileHeader from '@/components/MobileHeader';
+import PostFooter from '@/components/PostFooter';
+import CommentSection from '@/components/CommentSection';
+import Footer from '@/components/Footer';
 
 export default function Home() {
-  // Sample data to match the screenshot "Traveler"
+  // Sample data matching the screenshot "PC에서 크롬 모바일 모드로..."
   const post = {
-    title: "나만의 블로그 시작하기",
-    category: "일상",
-    date: "2026. 1. 22.",
+    title: "PC에서 크롬 모바일 모드로 보는 방법 (모바일 버전 화면)",
+    category: "PC/MO",
+    date: "2023. 12. 21. 23:53",
     content: `
-        <p>안녕하세요! 이것은 예시 블로그 포스트입니다.</p>
+        <p>PC로 크롬이나 익스플로어를 사용하다 보면 모바일에서 보는 화면을 모니터로 보고 싶은 하는 경우가 있다.</p>
+        <p>아무래도 자료를 만드는 작업을 PC로 하다 보니, 캡쳐나 빠른 구동을 컴퓨터로 확인하는 것이 유용하기 때문이다.</p>
         <br/>
-        <p>서버 연결 없이도 블로그의 모습을 확인할 수 있습니다.</p>
+        <p>이럴 때 사용하는 PC의 모바일 모드 사용 방법을 알아보자.</p>
+        <br/><br/>
+        <div style="border-left: 4px solid #333; padding-left: 15px; margin: 30px 0;">
+            <h3 style="font-size: 19px; font-weight: bold; color: #000; margin: 0;">PC에서 모바일 모드 사용하기</h3>
+        </div>
         <br/>
-        <p>오늘은 날씨가 참 좋습니다. 블로그 디자인을 개편하면서 모바일 뷰를 중점적으로 확인하고 있습니다.</p>
-        <br/>
-        <p><strong>주요 변경 사항:</strong></p>
-        <p>- 상단 헤더 디자인 개선</p>
-        <p>- 하단 바 아이콘 변경 (종이비행기 등)</p>
-        <p>- 댓글 및 푸터 UI 네이버 스타일로 동기화</p>
-        <br/>
-        <p>스크롤을 내려서 하단의 댓글과 통계바를 확인해주세요.</p>
-        <br/>
-        <p>감사합니다.</p>
+        <p>F12를 누르면 개발자 모드가 켜집니다...</p>
         <br/><br/><br/>
     `,
-    hashtags: ['청국장찌개', '청국장', '청국장맛있게끓이는법', '두부청국장'],
+    hashtags: ['PC모바일모드', '크롬모바일', '인터넷모바일', '모바일모드', '모바일버전'],
     userInfo: {
-      blogTitle: "My Vlog",
-      nickname: "여행가",
-      category: "요리·레시피",
-      neighborCount: "99,999+",
-      description: "건강이 최고의 재테크!",
-      profileImageUrl: "https://i.pravatar.cc/150?u=traveler"
+      blogTitle: "신선비의 IT학당",
+      nickname: "신선비",
+      category: "IT·컴퓨터",
+      neighborCount: "362",
+      description: "IT 전문 블로그 필요한 정보만 쉽게 설명합니다.",
+      profileImageUrl: "https://i.pravatar.cc/150?u=sinsunbi"
     },
     stats: {
-      likeCount: 45,
-      commentCount: 12,
-      shareCount: 10
+      likeCount: 6,
+      commentCount: 3,
+      shareCount: 1
     }
   };
 
@@ -47,26 +43,30 @@ export default function Home() {
     <div className="bg-white min-h-screen pb-[60px]">
       <MobileHeader blogName={post.userInfo.blogTitle} />
 
-      <main className="pt-[52px]"> {/* Adjusted for new header height */}
-        <div className="px-5 py-6">
-          <div className="mb-6">
-            <span className="text-[13px] text-[#03c75a] font-bold block mb-2">{post.category}</span>
-            <h1 className="text-[24px] font-bold leading-normal text-[#111] -tracking-[0.5px] mb-[10px]">{post.title}</h1>
-
-            {/* User Info / Date Line */}
-            <div className="flex items-center gap-2 text-[13px] text-[#888]">
-              <span className="font-bold text-[#333]">{post.userInfo.nickname}</span>
-              <span className="text-[#e5e5e5]">|</span>
-              <span>{post.date}</span>
-            </div>
+      <main className="pt-[52px]">
+        {/* Cover Section (Green Background from screenshot) */}
+        <div className="relative w-full aspect-[4/3] sm:aspect-video bg-[#587e45] flex flex-col justify-end p-[20px] text-white">
+          <div className="mb-[15px]">
+            <span className="text-[13px] opacity-90 mb-[5px] block font-light">{post.category}</span>
+            <h1 className="text-[22px] font-bold leading-[1.4] break-keep">{post.title}</h1>
           </div>
 
-          <hr className="border-t border-[#f0f0f0] my-6" />
+          <div className="flex items-center gap-[8px] text-[13px] opacity-80 border-t border-white/30 pt-[15px]">
+            <div className="w-[24px] h-[24px] rounded-full overflow-hidden bg-white/20">
+              {/* Profile Icon Placeholder */}
+              <img src={post.userInfo.profileImageUrl} alt="" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-bold">{post.userInfo.nickname}</span>
+            <span className="text-[12px]">{post.date}</span>
+          </div>
+        </div>
 
+        <div className="px-[20px] py-[30px]">
           {/* Post Content */}
-          <div className="prose max-w-none text-[16px] leading-[1.8] text-[#333] min-h-[100px]"
+          <div className="prose max-w-none text-[16px] leading-[1.8] text-[#333] tracking-[-0.3px]"
             dangerouslySetInnerHTML={{ __html: post.content }} />
         </div>
+
 
         {/* Post Footer (Stats, Hashtags, Profile) */}
         <PostFooter
@@ -86,7 +86,7 @@ export default function Home() {
 
         {/* Page Footer */}
         <Footer />
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }

@@ -1,39 +1,56 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import api from '@/src/lib/axios'; // Global api instance (includes JWT interceptor)
-import CommentForm from './CommentForm';
+import api from '@/lib/axios';
 import CommentList from './CommentList';
 
 const CommentSection = ({ postId = 1, onCommentChange }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [commentText, setCommentText] = useState('');
 
   // Fetch Comments (MOCKED FOR VISUAL CHECK)
   const fetchComments = async () => {
     try {
       setLoading(true);
-      // MOCK DATA
-      const mockComments = Array(12).fill(null).map((_, i) => ({
-        commentId: i + 1,
-        content: i === 0 ? "정말 유익한 정보네요! 감사합니다." : `안녕하세요, 댓글 테스트입니다. ${i + 1}`,
-        createdAt: "2026. 1. 22. 12:30",
-        isSecret: i === 1, // 2nd comment secret
-        likeCount: i % 3 === 0 ? 5 : 0,
-        isLiked: false,
-        author: {
-          nickname: i === 0 ? "이웃1" : `방문자${i}`,
-          profileImageUrl: null
+      // MOCK DATA - 실제 네이버 스크린샷 기반
+      const mockComments = [
+        {
+          commentId: 1,
+          content: null,
+          createdAt: "2023.12.22. 06:10",
+          isSecret: true,
+          likeCount: 0,
+          isLiked: false,
+          author: { nickname: "익명", profileImageUrl: null }
+        },
+        {
+          commentId: 2,
+          content: "되돌리는 방법은 없나요..?",
+          createdAt: "2024.4.17. 12:06",
+          isSecret: false,
+          likeCount: 0,
+          isLiked: false,
+          author: { nickname: "에잇에잇호오호오", profileImageUrl: null }
+        },
+        {
+          commentId: 3,
+          content: "F12 누르시고 오른쪽 창에서 태블릿/모바일 모드를 꺼주시면 됩니다.\n불이 꺼져있는게 비활성화입니다.",
+          createdAt: "2024.4.17. 14:13",
+          isSecret: false,
+          likeCount: 0,
+          isLiked: false,
+          parentId: 2, // 답글
+          author: { nickname: "신선비", profileImageUrl: null }
         }
-      }));
+      ];
 
-      // Simulate delay
       await new Promise(resolve => setTimeout(resolve, 300));
 
       setComments(mockComments);
-      setTotalCount(12);
-      return 12;
+      setTotalCount(3);
+      return 3;
     } catch (error) {
       console.error('Error fetching comments:', error);
     } finally {
@@ -41,14 +58,12 @@ const CommentSection = ({ postId = 1, onCommentChange }) => {
     }
   };
 
-  // Initial Fetch
   useEffect(() => {
     fetchComments();
   }, [postId]);
 
-  // Notify Parent/Global
   const notifyCommentChange = async () => {
-    const newCommentCount = await fetchComments(); // Refresh and get count
+    const newCommentCount = await fetchComments();
 
     if (onCommentChange) {
       onCommentChange(newCommentCount);
@@ -56,23 +71,22 @@ const CommentSection = ({ postId = 1, onCommentChange }) => {
 
     window.dispatchEvent(
       new CustomEvent('commentChanged', {
-        detail: {
-          postId,
-          commentCount: newCommentCount,
-        },
+        detail: { postId, commentCount: newCommentCount },
       }),
     );
   };
 
-  // Add Comment
-  const handleAddComment = async (content, isSecret) => {
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+
     try {
       const response = await api.post(`/posts/${postId}/comments`, {
-        content: content,
-        isSecret: isSecret || false,
+        content: commentText.trim(),
+        isSecret: false,
       });
 
       if (response.status === 201 || response.status === 200) {
+        setCommentText('');
         await notifyCommentChange();
       }
     } catch (error) {
@@ -81,7 +95,6 @@ const CommentSection = ({ postId = 1, onCommentChange }) => {
     }
   };
 
-  // Like Comment
   const handleLikeComment = async commentId => {
     try {
       const response = await api.post(`/comments/${commentId}/like`);
@@ -93,7 +106,6 @@ const CommentSection = ({ postId = 1, onCommentChange }) => {
     }
   };
 
-  // Delete Comment
   const handleDeleteComment = async commentId => {
     if (!confirm('Are you sure you want to delete this comment?')) return;
 
@@ -114,43 +126,47 @@ const CommentSection = ({ postId = 1, onCommentChange }) => {
   }
 
   return (
-    <div className="max-w-[920px] mx-auto p-[20px] bg-white pb-[80px]"> {/* pb-80 for floating button space */}
-
+    <div className="bg-white pb-[80px]">
       {/* Header: Comment Count */}
-      <div className="mb-[16px] text-[16px] font-bold text-[#333] flex items-center gap-1">
-        <span>댓글</span>
-        <span className="text-[#03c75a]">{totalCount}</span>
+      <div className="px-5 py-4 border-t border-[#f0f0f0]">
+        <div className="text-[15px] font-bold text-[#333]">
+          댓글 <span className="text-[#03c75a]">{totalCount}</span>
+        </div>
       </div>
 
       {/* Comment List */}
-      <CommentList
-        comments={comments}
-        onLikeComment={handleLikeComment}
-        onDeleteComment={handleDeleteComment}
-      />
-
-      {/* Pagination (Static for now as per previous code) */}
-      <div className="flex justify-center items-center mb-[30px] gap-[20px]">
-        <span className="px-[1px] py-[2px] border border-[#ddd] bg-white text-black rounded-[4px] text-[14px] min-w-[36px] h-[32px] flex items-center justify-center">
-          1
-        </span>
+      <div className="px-5">
+        <CommentList
+          comments={comments}
+          onLikeComment={handleLikeComment}
+          onDeleteComment={handleDeleteComment}
+        />
       </div>
 
-      {/* Comment Form */}
-      <CommentForm onAddComment={handleAddComment} />
-
-      {/* Floating Write Button */}
-      {/* Positioned fixed at bottom right, typically above the bottom navigation if exists */}
-      <button
-        className="fixed bottom-[20px] right-[20px] z-50 bg-[#03c75a] text-white rounded-full px-[20px] py-[12px] shadow-lg flex items-center gap-[6px] font-bold text-[14px]"
-        onClick={() => {
-          // Logic to focus comment form or open it. For now, simple scroll to bottom
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }}
-      >
-        <span className="text-[18px]">+</span>
-        <span>댓글쓰기</span>
-      </button>
+      {/* Fixed Bottom Comment Input */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e5e5e5] px-4 py-3 z-50">
+        <div className="max-w-[430px] mx-auto flex items-center gap-3">
+          <input
+            type="text"
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
+            placeholder="댓글을 입력해주세요."
+            className="flex-1 h-[40px] px-4 bg-[#f5f5f5] rounded-[20px] text-[14px] outline-none placeholder:text-[#999] border-none"
+          />
+          <button
+            onClick={handleAddComment}
+            disabled={!commentText.trim()}
+            className={`h-[40px] px-5 rounded-[20px] text-[14px] font-medium transition-colors ${
+              commentText.trim()
+                ? 'bg-[#03c75a] text-white'
+                : 'bg-[#e5e5e5] text-[#999] cursor-not-allowed'
+            }`}
+          >
+            등록
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { PostArticle } from "@/components/blog/PostArticle";
 import { notFound } from "next/navigation";
 
 export default async function PostDetail({ params }: { params: Promise<{ postId: string }> }) {
@@ -15,10 +13,11 @@ export default async function PostDetail({ params }: { params: Promise<{ postId:
 
     if (!post) return notFound();
 
+    // 일단 메인 페이지로 리다이렉트 (나중에 동적 데이터 연동 시 수정)
     return (
         <div className="flex flex-col gap-4 p-4">
-            <PostArticle post={post} />
-            <Sidebar className="w-full" />
+            <h1 className="text-xl font-bold">{post.title}</h1>
+            <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
         </div>
     );
 }

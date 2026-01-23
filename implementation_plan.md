@@ -15,24 +15,41 @@ Create a functional clone of the Naver Blog interface with specific backend capa
 ```
 Naver-clone/
 ├── app/
-│   ├── layout.tsx              # Root Layout
+│   ├── layout.tsx              # Root Layout (max-w-[430px])
 │   ├── page.tsx                # Blog Main
 │   ├── blog/[postId]/page.tsx  # Post Detail
 │   ├── admin/page.tsx          # Admin Control Panel
 │   └── api/                    # Backend API
-│       ├── posts/[id]/
-│       │   ├── views/route.ts  # PUT: Set View Count
-│       │   ├── likes/route.ts  # PUT: Set Like Count
-│       │   └── comments/       # GET/POST Comments
 ├── components/
-│   ├── layout/ (Header, Sidebar, Footer)
-│   ├── blog/   (PostList, PostCard, CommentSection)
-│   └── ui/     (Buttons, Inputs, etc.)
+│   ├── MobileHeader.jsx        # Naver Mobile Header (52px)
+│   ├── PostFooter.jsx          # Like/Comment/Share Bar
+│   ├── CommentSection.jsx      # Naver Style Comments
+│   └── ...
 ├── lib/
 │   ├── prisma.ts
 │   └── utils.ts
-└── prisma/schema.prisma
+└── public/
+    └── fonts/                  # NanumSquareNeo (Optional or CDN)
 ```
+
+### 1.5. Visual Overhaul (New - 2026-01-23)
+**Goal:** Achieve 1:1 pixel perfection with Naver Mobile Blog.
+
+**Specs:**
+- **Font:** NanumSquareNeo / NanumBarunGothic (via Google Fonts or CDN).
+- **Colors:**
+    - Primary Green: `#03C75A`
+    - Background: `#FFFFFF` / `#F5F6F8` (Separators)
+    - Text: `#222222` (Body), `#000000` (Title), `#888888` (Meta)
+    - Border: `#E4E8EB`
+- **Layout:**
+    - Header Height: `52px` (Sticky)
+    - Side Padding: `20px`
+    - Typography: Title `24px/Bold`, Body `16px/1.6`
+- **Components:**
+    - `MobileHeader`: Left Back, Center Title (Truncated), Right Search/Menu.
+    - `PostFooter`: Like (Oval), Comment (Oval), Share/More (Icons).
+    - `CommentSection`: Input box with specific border radius and button styles.
 
 ### 2. Database Schema (Prisma)
 ```prisma
