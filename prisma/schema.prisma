@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Post {
-  id        Int       @id @default(autoincrement())
-  title     String
-  content   String
-  viewCount Int       @default(0)
-  likeCount Int       @default(0)
-  category  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  comments  Comment[]
+  id           Int       @id @default(autoincrement())
+  title        String
+  content      String
+  viewCount    Int       @default(0)
+  likeCount    Int       @default(0)
+  category     String?
+  allowComment Boolean   @default(true) // New: Toggle comments
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  comments     Comment[]
 }
 
 model Comment {
@@ -26,6 +27,17 @@ model Comment {
   authorName String
   authorIcon String?
   content    String
-  parentId   Int?      // For nested replies (one level deep or recursive)
+  pass       String?   // Optional password for guest deletion
+  likeCount  Int       @default(0) // New: Comment likes
+  parentId   Int?      // Self-relation
+  parent     Comment?  @relation("Reply", fields: [parentId], references: [id])
+  replies    Comment[] @relation("Reply")
   createdAt  DateTime  @default(now())
+}
+
+model BlogConfig {
+  id         Int    @id @default(autoincrement())
+  blogName   String @default("My Blog")
+  ownerName  String @default("Owner")
+  categories String @default("Daily,Tech,Travel") // Simple CSV storage
 }
