@@ -1,20 +1,54 @@
 @import "tailwindcss";
 
 @theme {
-  /* Naver Colors */
-  --color-naver-green: #00C73C;
-  --color-naver-hover: #02b351;
-  --color-naver-text: #333333;
-  --color-naver-light: #F5F6F8;
-  --color-naver-border: #EBEBEB;
-  --color-naver-bg: #F9F9F9;
+  --color-primary: #03c75a;
+  --color-primary-hover: #00b14f;
+  --color-text: #111111;
+  --color-text-light: #767676;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f7f8fa;
+  --color-border: #e8e8e8;
 
-  /* Font Family - Extending sans */
-  --font-sans: "Nanum Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-sans: "Apple SD Gothic Neo", "Noto Sans KR", "Pretendard", "Malgun Gothic", sans-serif;
 }
 
 @layer base {
   body {
-    @apply text-naver-text bg-naver-bg antialiased;
+    @apply bg-bg text-text antialiased;
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  .article-html {
+    color: #222;
+    font-size: 17px;
+    line-height: 1.9;
+    letter-spacing: -0.01em;
+  }
+
+  .article-html p {
+    margin: 0 0 1.25rem;
+  }
+
+  .article-html blockquote {
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    background: #e9f5d0;
+    padding: 0.65rem 0.75rem;
+    font-weight: 500;
+    color: #202020;
+  }
+
+  .article-html hr {
+    margin: 1.75rem 0;
+    border: 0;
+    border-top: 1px solid #ececec;
+  }
+
+  .article-html a {
+    color: #03c75a;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 }

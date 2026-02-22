@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import MobileHeader from "@/components/layout/MobileHeader";
-import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Naver Blog Clone",
-  description: "Pixel-perfect clone of Naver Blog UI",
+  description: "Mobile-first Naver Blog style article page",
 };
 
 export default function RootLayout({
@@ -16,13 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased min-h-screen bg-gray-100 flex justify-center">
-        <div className="w-full max-w-[768px] bg-white min-h-screen shadow-lg flex flex-col">
+      <body className="min-h-screen bg-bg text-text antialiased">
+        <div className="mx-auto flex min-h-screen w-full max-w-[740px] flex-col bg-white">
           <MobileHeader />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
+          <main className="flex-1">{children}</main>
         </div>
       </body>
     </html>

@@ -1,30 +1,68 @@
-export default function PostHeader() {
-    return (
-        <div className="relative w-full h-[250px] overflow-hidden">
-            {/* Background Image Layer */}
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-[2px] opacity-90 scale-105"
-                style={{ backgroundImage: "url('https://mblogthumb-phinf.pstatic.net/MjAyNjAxMjNfMTA1/MDAxNzY5MTUyNDQ2NDk1.opkMrJi9rJ5ZJ0ySe6bPBoTWTn/900%ef%bc%bf0ce40b128c7198df5a460d1be9f9ffaf.1000x1000x1a44d.png?type=w800')" }}
-            ></div>
-            <div className="absolute inset-0 bg-black/30"></div>
+"use client";
 
-            {/* Content Layer */}
-            <div className="absolute bottom-0 left-0 w-full p-5 text-white z-10">
-                <div className="text-sm font-bold opacity-90 mb-2">주간 신곡 정리</div>
-                <h1 className="text-xl font-bold leading-tight mb-4 text-shadow-sm">
-                    [주간 리뷰] 26.01.23 (Harry Styles, James Blake, Joji 등등)
+import Image from "next/image";
+import { BadgeCheck, MoreVertical } from "lucide-react";
+import { usePostStore } from "@/store/usePostStore";
+
+const getInitial = (value: string) => value.trim().charAt(0) || "B";
+
+export default function PostHeader() {
+    const { posts, currentPostId } = usePostStore();
+    const post = posts.find(p => p.id === currentPostId);
+
+    if (!post) return null;
+
+    const hasProfileImage = post.authorProfileImage.trim().length > 0;
+
+    return (
+        <section className="bg-white">
+            <div className="px-5 pb-4 pt-7">
+                <p className="text-[14px] font-normal text-[#666]">{post.category}</p>
+
+                <h1 className="mt-3 text-[31px] font-bold leading-[1.38] tracking-[-0.02em] text-[#101010]">
+                    {post.title}
                 </h1>
 
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white/30">
-                        <img src="https://blogpfthumb-phinf.pstatic.net/MjAyNDA5MThfNzEg/MDAxNzI2NjM2MTg1ODk4.fPWx6JYAgleZ7YOgc1Ips9VLBlE3fOs17JZ8b8wbHiwg.FCD02sXtnTB7cHxKwN5A_WOB5bC6qyV2JI3y-8RgvAkg.JPEG/profileImageee7c.jpg?type=s1" alt="Profile" />
+                <div className="mt-6 flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#ececec]">
+                            {hasProfileImage ? (
+                                <Image src={post.authorProfileImage} alt={post.author} fill className="object-cover" />
+                            ) : (
+                                <span className="flex h-full w-full items-center justify-center text-[14px] font-semibold text-[#5f5f5f]">
+                                    {getInitial(post.author)}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-1 text-[15px] font-semibold text-[#111]">
+                                <span className="truncate">{post.author}</span>
+                                <BadgeCheck size={16} className="text-primary" strokeWidth={1.8} />
+                            </div>
+                            <p className="mt-0.5 text-[12px] text-[#8d8d8d]">{post.date}</p>
+                        </div>
                     </div>
-                    <div className="flex flex-col text-[11px] leading-tight">
-                        <span className="font-bold">대동</span>
-                        <span className="opacity-80">4시간 전</span>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            className="h-8 rounded-[4px] border border-primary px-3 text-[13px] font-medium text-primary"
+                        >
+                            + 이웃추가
+                        </button>
+                        <button
+                            type="button"
+                            aria-label="더보기"
+                            className="grid h-8 w-8 place-items-center rounded-md text-[#666]"
+                        >
+                            <MoreVertical size={18} strokeWidth={1.8} />
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div className="mx-5 border-b border-border" />
+        </section>
     );
 }

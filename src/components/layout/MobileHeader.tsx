@@ -1,35 +1,28 @@
 import Link from "next/link";
-import { Search, Menu } from "lucide-react";
+import { LayoutGrid, Menu, Search } from "lucide-react";
 
 export default function MobileHeader() {
     return (
-        <div className="w-full bg-white border-b border-naver-border sticky top-0 z-50">
-            <div className="flex justify-between items-center h-[52px] px-4">
-                {/* Left Side: Service Logo */}
-                <h1 className="flex items-center">
-                    <Link href="#" className="flex items-center gap-1">
-                        <span className="text-naver-green font-black text-xl tracking-tighter">blog</span>
+        <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur">
+            <div className="flex h-14 items-center gap-3 px-5">
+                <Link href="/" className="text-[28px] leading-none tracking-[-0.02em] text-[#1f1f1f]">
+                    blog
+                </Link>
+
+                <Link href="/posts" className="flex min-w-0 items-center gap-2">
+                    <LayoutGrid size={18} strokeWidth={1.9} className="shrink-0 text-[#202020]" />
+                    <span className="truncate text-[15px] font-medium text-[#1a1a1a]">팀 트라이 : 성장 기록 아카이브</span>
+                </Link>
+
+                <div className="ml-auto flex items-center gap-4 text-[#1a1a1a]">
+                    <Link href="/posts" aria-label="검색" className="p-0.5">
+                        <Search size={22} strokeWidth={1.9} />
                     </Link>
-                </h1>
-
-                {/* Center: Blog Title (Hidden on small screens if needed, or structured differently) */}
-                <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center text-center">
-                    <span className="text-sm font-bold text-gray-800 line-clamp-1 max-w-[150px]">
-                        iamdaedong
-                    </span>
-                </div>
-
-
-                {/* Right Side: Tools */}
-                <div className="flex items-center gap-4">
-                    <button className="text-gray-800">
-                        <Search size={24} strokeWidth={1.5} />
-                    </button>
-                    <button className="text-gray-800">
-                        <Menu size={24} strokeWidth={1.5} />
-                    </button>
+                    <Link href="/posts" aria-label="메뉴" className="p-0.5">
+                        <Menu size={22} strokeWidth={1.9} />
+                    </Link>
                 </div>
             </div>
-        </div>
+        </header>
     );
 }
