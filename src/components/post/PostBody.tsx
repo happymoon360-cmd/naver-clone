@@ -73,7 +73,7 @@ export default function PostBody() {
     });
 
     return (
-        <section className="se-main-container bg-white px-3.5 pb-5 pt-3.5">
+        <section className="bg-white px-3.5 pb-5 pt-3.5">
             <div className="space-y-4">{decoratedContent}</div>
         </section>
     );
