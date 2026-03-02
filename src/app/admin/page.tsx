@@ -12,8 +12,8 @@ import SeLine from "@/components/smart-editor/SeLine";
 import { mockPosts } from "@/lib/mockPosts";
 
 const DEFAULT_AUTHOR = "대동";
-const DEFAULT_AUTHOR_IMAGE = "https://blogpfthumb-phinf.pstatic.net/MjAyNDA5MThfNzEg/MDAxNzI2NjM2MTg1ODk4.fPWx6JYAgleZ7YOgc1Ips9VLBlE3fOs17JZ8b8wbHiwg.FCD02sXtnTB7cHxKwN5A_WOB5bC6qyV2JI3y-8RgvAkg.JPEG/profileImageee7c.jpg?type=s1";
-const DEFAULT_HEADER_IMAGE = "https://mblogthumb-phinf.pstatic.net/MjAyNjAxMjNfMTA1/MDAxNzY5MTUyNDQ2NDk1.opkMrJi9rJ5ZJ0ySe6bPBoTWTn/900%ef%bc%bf0ce40b128c7198df5a460d1be9f9ffaf.1000x1000x1a44d.png?type=w800";
+const DEFAULT_AUTHOR_IMAGE = "https://picsum.photos/seed/bestie-author/200/200";
+const DEFAULT_HEADER_IMAGE = "https://picsum.photos/seed/bestie-header/1200/900";
 
 export default function AdminPage() {
     const {
