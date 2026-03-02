@@ -50,7 +50,7 @@ export default function PostHeader() {
 
                     <div className="flex shrink-0 items-center gap-1.5">
                         <button type="button" className="h-7 rounded-[4px] border border-primary px-2.5 text-[11px] font-semibold text-primary">
-                            +이웃추가
+                            +구독
                         </button>
                         <button type="button" aria-label="더보기" className="grid h-7 w-7 place-items-center text-[#7b7b7b]">
                             <MoreVertical size={15} strokeWidth={1.9} />
