@@ -80,7 +80,7 @@ export default function CommentInput({
                     type="button"
                     onClick={() => void handleSubmit()}
                     disabled={!canSubmit}
-                    className="rounded-sm bg-[#03c75a] px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#00b14f] disabled:cursor-not-allowed disabled:bg-[#9fcab2]"
+                    className="rounded-sm bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-[#9fcab2]"
                 >
                     {submitting ? "등록 중" : submitLabel}
                 </button>

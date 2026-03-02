@@ -318,7 +318,7 @@ export const usePostStore = create<PostStore>()(
             }))
         }),
         {
-            name: 'naver-blog-posts',
+            name: 'mybestie-posts',
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.posts = ensurePosts(state.posts ?? []);
@@ -330,7 +330,7 @@ export const usePostStore = create<PostStore>()(
 
 if (typeof window !== "undefined") {
     window.addEventListener("storage", (event) => {
-        if (event.key !== "naver-blog-posts" || !event.newValue) return;
+        if (event.key !== "mybestie-posts" || !event.newValue) return;
         try {
             const data = JSON.parse(event.newValue);
             const nextPosts = data?.state?.posts;

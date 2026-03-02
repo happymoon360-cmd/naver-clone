@@ -16,9 +16,9 @@ export default function PostBody() {
     const textPool = ["본문 텍스트", "디자인 샘플", "레이아웃 확인", "구성 확인 문장"];
     const compactText = (seed: string) => textPool[seed.length % textPool.length];
     const fallbackImages = [
-        "https://picsum.photos/seed/naver-inline-1/1200/900",
-        "https://picsum.photos/seed/naver-inline-2/1200/900",
-        "https://picsum.photos/seed/naver-inline-3/1200/900"
+        "https://picsum.photos/seed/bestie-inline-1/1200/900",
+        "https://picsum.photos/seed/bestie-inline-2/1200/900",
+        "https://picsum.photos/seed/bestie-inline-3/1200/900"
     ];
 
     const renderBlock = (block: ContentBlock) => {
