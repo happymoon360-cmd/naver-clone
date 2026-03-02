@@ -16,14 +16,14 @@ const quoteMap: Record<number, string> = {
   6: "인용구 자리"
 };
 
-const DEFAULT_AUTHOR_IMAGE = "https://blogpfthumb-phinf.pstatic.net/MjAyNDA5MThfNzEg/MDAxNzI2NjM2MTg1ODk4.fPWx6JYAgleZ7YOgc1Ips9VLBlE3fOs17JZ8b8wbHiwg.FCD02sXtnTB7cHxKwN5A_WOB5bC6qyV2JI3y-8RgvAkg.JPEG/profileImageee7c.jpg?type=s1";
-const DEFAULT_HEADER_IMAGE = "https://picsum.photos/seed/naver-header-cover/1200/900";
+const DEFAULT_AUTHOR_IMAGE = "https://picsum.photos/seed/bestie-author/200/200";
+const DEFAULT_HEADER_IMAGE = "https://picsum.photos/seed/bestie-header/1200/900";
 
 const ARTICLE_IMAGES = [
-  "https://picsum.photos/seed/naver-detail-1/1200/900",
-  "https://picsum.photos/seed/naver-detail-2/1200/900",
-  "https://picsum.photos/seed/naver-detail-3/1200/900",
-  "https://picsum.photos/seed/naver-detail-4/1200/900"
+  "https://picsum.photos/seed/bestie-detail-1/1200/900",
+  "https://picsum.photos/seed/bestie-detail-2/1200/900",
+  "https://picsum.photos/seed/bestie-detail-3/1200/900",
+  "https://picsum.photos/seed/bestie-detail-4/1200/900"
 ];
 
 const CONTENT_REPEAT_COUNT = 2;
