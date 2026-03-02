@@ -3,8 +3,8 @@ import "./globals.css";
 import MobileHeader from "@/components/layout/MobileHeader";
 
 export const metadata: Metadata = {
-  title: "Naver Blog Clone",
-  description: "Mobile-first Naver Blog style article page",
+  title: "mybestie",
+  description: "mybestie — personal blog",
 };
 
 export default function RootLayout({
