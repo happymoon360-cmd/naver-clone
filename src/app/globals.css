@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #03c75a;
-  --color-primary-hover: #00b14f;
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
   --color-text: #111111;
   --color-text-light: #767676;
   --color-bg: #ffffff;
@@ -34,7 +34,7 @@
   .article-html blockquote {
     margin: 1.5rem 0;
     border-radius: 4px;
-    background: #e9f5d0;
+    background: #e0f2fe;
     padding: 0.65rem 0.75rem;
     font-weight: 500;
     color: #202020;
@@ -47,7 +47,7 @@
   }
 
   .article-html a {
-    color: #03c75a;
+    color: #0ea5e9;
     text-decoration: underline;
     text-underline-offset: 2px;
   }
