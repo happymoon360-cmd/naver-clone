@@ -1,55 +1,163 @@
-import { User } from "lucide-react";
+"use client";
 
-export default function CommentList() {
-    const comments = [
-        {
-            id: 1,
-            author: "김개발",
-            content: "Next.js 마이그레이션 기대됩니다! 화이팅!",
-            date: "2026. 1. 23. 21:05",
-            isReply: false,
-        },
-        {
-            id: 2,
-            author: "이디자이너",
-            content: "네이버 그린 컬러 코드가 정확하네요. 깔끔합니다.",
-            date: "2026. 1. 23. 21:10",
-            isReply: false,
-        },
-        {
-            id: 3,
-            author: "허석준",
-            content: "감사합니다! 디자인 디테일에 신경을 많이 쓰고 있습니다.",
-            date: "2026. 1. 23. 21:15",
-            isReply: true,
-        },
-    ];
+import { Heart, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import type { Comment } from "@/store/usePostStore";
+import CommentInput from "./CommentInput";
+
+interface CommentListProps {
+    comments: Comment[];
+    onLikeComment: (id: number) => void;
+    onAddReply: (payload: { author: string; content: string; parentId: number }) => void | Promise<void>;
+    readOnly?: boolean;
+    busyCommentId?: number | null;
+}
+
+export default function CommentList({ comments, onLikeComment, onAddReply, readOnly, busyCommentId }: CommentListProps) {
+    if (comments.length === 0) {
+        return (
+            <div className="py-10 text-center text-[#8f8f8f]">
+                <MessageCircle size={28} className="mx-auto mb-2 opacity-60" />
+                <p className="text-[14px]">첫 댓글을 남겨보세요.</p>
+            </div>
+        );
+    }
+
+    const sorted = [...comments].sort((a, b) => b.timestamp - a.timestamp);
+
+    const topLevel = sorted.filter(comment => !comment.parentId);
+    const repliesByParent: Record<number, Comment[]> = {};
+
+    sorted.forEach(comment => {
+        if (comment.parentId) {
+            if (!repliesByParent[comment.parentId]) {
+                repliesByParent[comment.parentId] = [];
+            }
+            repliesByParent[comment.parentId].push(comment);
+        }
+    });
 
     return (
-        <div className="space-y-4 mb-8">
-            {comments.map((comment) => (
-                <div
-                    key={comment.id}
-                    className={`flex gap-3 ${comment.isReply ? "ml-10 pl-4 border-l-2 border-gray-100" : ""}`}
-                >
-                    <div className="flex-shrink-0 w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-gray-400">
-                        <User size={18} />
-                    </div>
-                    <div className="flex-grow">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-gray-800">{comment.author}</span>
-                            <span className="text-xs text-gray-400">{comment.date}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 leading-normal">
-                            {comment.content}
-                        </p>
-                        <div className="mt-1 flex gap-2 text-xs text-gray-400">
-                            <button className="hover:underline">답글</button>
-                            <button className="hover:underline">공감</button>
-                        </div>
-                    </div>
+        <div className="space-y-2">
+            {topLevel.map(comment => (
+                <div key={comment.id}>
+                    <CommentItem
+                        comment={comment}
+                        onLike={() => onLikeComment(comment.id)}
+                        onReply={payload => onAddReply({ ...payload, parentId: comment.id })}
+                        canReply={!readOnly}
+                        isReadOnly={readOnly}
+                        busy={busyCommentId === comment.id}
+                    />
+                    {repliesByParent[comment.id] &&
+                        repliesByParent[comment.id]
+                            .sort((a, b) => a.timestamp - b.timestamp)
+                            .map(reply => (
+                            <CommentItem
+                                key={reply.id}
+                                comment={reply}
+                                onLike={() => onLikeComment(reply.id)}
+                                onReply={() => Promise.resolve()}
+                                isReply
+                                isReadOnly={readOnly}
+                                busy={busyCommentId === reply.id}
+                            />
+                        ))}
                 </div>
             ))}
         </div>
+    );
+}
+
+interface CommentItemProps {
+    comment: Comment;
+    onLike: () => void;
+    onReply: (payload: { author: string; content: string }) => void | Promise<void>;
+    isReply?: boolean;
+    canReply?: boolean;
+    isReadOnly?: boolean;
+    busy?: boolean;
+}
+
+function CommentItem({ comment, onLike, onReply, isReply, canReply, isReadOnly, busy }: CommentItemProps) {
+    const [isReplying, setIsReplying] = useState(false);
+
+    const handleLike = () => {
+        onLike();
+    };
+
+    const handleReplySubmit = async (payload: { author: string; content: string }) => {
+        await onReply(payload);
+        setIsReplying(false);
+    };
+
+    const formatTime = (timestamp: number) => {
+        return new Date(timestamp).toLocaleString("ko-KR", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    };
+
+    const initial = comment.author.trim().charAt(0) || "익";
+
+    return (
+        <article className={`border-b border-[#efefef] px-0 py-4 ${isReply ? "ml-7" : ""}`}>
+            <div className="flex items-start gap-3">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#ececec] text-[12px] font-semibold text-[#656565]">
+                    {initial}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-[14px] font-semibold text-[#1f1f1f]">{comment.author}</div>
+                        <div className="text-[12px] text-[#999]">{formatTime(comment.timestamp)}</div>
+                    </div>
+
+                    <p className="mt-2 whitespace-pre-wrap text-[15px] leading-[1.55] text-[#272727]">{comment.content}</p>
+
+                    <div className="mt-3 flex items-center gap-4">
+                        <button
+                            type="button"
+                            onClick={handleLike}
+                            disabled={isReadOnly || busy}
+                            className={`inline-flex items-center gap-1 text-[13px] transition-colors ${
+                                comment.isLiked ? "text-[#ff5e8b]" : "text-[#888] hover:text-[#4f4f4f]"
+                            } ${isReadOnly || busy ? "cursor-not-allowed opacity-70" : ""}`}
+                        >
+                            <Heart size={14} fill={comment.isLiked ? "currentColor" : "none"} />
+                            <span>{comment.likes}</span>
+                        </button>
+
+                        {canReply && (
+                            <button
+                                type="button"
+                                onClick={() => setIsReplying(prev => !prev)}
+                                className="text-[13px] text-[#9a9a9a] transition-colors hover:text-[#6c6c6c]"
+                            >
+                                {isReplying ? "취소" : "답글"}
+                            </button>
+                        )}
+                    </div>
+
+                    {canReply && isReplying && (
+                        <div className="mt-3">
+                            <CommentInput
+                                compact
+                                submitLabel="답글 등록"
+                                placeholder="답글을 입력하세요."
+                                onAddComment={handleReplySubmit}
+                            />
+                        </div>
+                    )}
+                </div>
+                {busy && (
+                    <div className="pt-2 text-[12px] text-[#9a9a9a]">
+                        처리 중...
+                    </div>
+                )}
+            </div>
+        </article>
     );
 }

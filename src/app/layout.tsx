@@ -14,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="min-h-screen bg-bg text-text antialiased">
-        <div className="mx-auto flex min-h-screen w-full max-w-[740px] flex-col bg-white">
+      <body className="min-h-screen bg-[#f4f5f6] text-text antialiased">
+        <div className="mx-auto flex min-h-screen w-full flex-col">
           <MobileHeader />
           <main className="flex-1">{children}</main>
         </div>

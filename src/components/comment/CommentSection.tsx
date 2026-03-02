@@ -1,193 +1,324 @@
 "use client";
 
-import { BadgeCheck, ChevronRight, Heart, MessageCircle, Play } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { MessageCircle } from "lucide-react";
+import Image from "next/image";
+import CommentInput from "./CommentInput";
+import CommentList from "./CommentList";
 import { usePostStore } from "@/store/usePostStore";
+import type { Comment } from "@/store/usePostStore";
 
-const clipCards = [
-    {
-        id: "clip-1",
-        title: "결국 멀리 가는 사람은 매일 같은 루틴을 지킨다",
-        time: "3분 전",
-        likes: 24,
-        comments: 3,
-        author: "팀 트라이"
-    },
-    {
-        id: "clip-2",
-        title: "의욕이 없어도 앞으로 나아가게 만드는 체크리스트",
-        time: "9분 전",
-        likes: 17,
-        comments: 1,
-        author: "팀 트라이"
-    },
-    {
-        id: "clip-3",
-        title: "집중력이 흔들릴 때 다시 중심을 잡는 5가지 방법",
-        time: "23분 전",
-        likes: 31,
-        comments: 6,
-        author: "팀 트라이"
-    },
-    {
-        id: "clip-4",
-        title: "작게 시작해서 끝까지 가는 시스템 설계법",
-        time: "1시간 전",
-        likes: 42,
-        comments: 8,
-        author: "팀 트라이"
+const getErrorMessage = async (response: Response, fallback: string) => {
+    try {
+        const data = (await response.json()) as { message?: unknown };
+        if (typeof data.message === "string" && data.message.trim()) {
+            return data.message;
+        }
+    } catch {
+        return fallback;
     }
-];
+    return fallback;
+};
+
+const FALLBACK_THUMBNAIL = "https://picsum.photos/seed/naver-related/900/700";
+const toSimpleTitle = (index: number) => `관련 글 제목 ${String(index + 1).padStart(2, "0")}`;
 
 export default function CommentSection() {
-    const { currentPostId, posts, setCurrentPostId } = usePostStore();
-    const post = posts.find(item => item.id === currentPostId);
+    const {
+        currentPostId,
+        posts,
+        setComments,
+        addComment,
+        setCommentLikeState,
+        toggleCommentLike
+    } = usePostStore();
 
-    if (!post) return null;
+    const post = useMemo(
+        () => posts.find(item => item.id === currentPostId),
+        [posts, currentPostId]
+    );
 
-    const sameCategoryPosts = posts.filter(item => item.category === post.category);
-    const currentIndex = sameCategoryPosts.findIndex(item => item.id === post.id);
-    const previousPost = currentIndex > 0 ? sameCategoryPosts[currentIndex - 1] : null;
-    const nextPost = currentIndex >= 0 && currentIndex < sameCategoryPosts.length - 1
-        ? sameCategoryPosts[currentIndex + 1]
-        : null;
+    const [loading, setLoading] = useState(false);
+    const [notice, setNotice] = useState<string | null>(null);
+    const [busyCommentId, setBusyCommentId] = useState<number | null>(null);
 
-    const handleNavigatePost = (targetId: string | null) => {
-        if (!targetId) return;
-        setCurrentPostId(targetId);
-        if (typeof window !== "undefined") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+    const relatedPosts = useMemo(
+        () => posts.filter(item => item.id !== currentPostId).slice(0, 6),
+        [posts, currentPostId]
+    );
+
+    const buildLocalComment = (payload: { author: string; content: string; parentId?: number }) => {
+        if (!post) return null;
+        const nextId = post.comments.reduce((maxId, item) => Math.max(maxId, item.id), 0) + 1;
+        const localComment: Comment = {
+            id: nextId,
+            content: payload.content.trim(),
+            author: payload.author.trim() || "익명",
+            timestamp: Date.now(),
+            likes: 0,
+            isLiked: false,
+            parentId: payload.parentId
+        };
+        return localComment;
+    };
+
+    useEffect(() => {
+        if (!currentPostId) return;
+        let active = true;
+
+        const loadComments = async () => {
+            setLoading(true);
+            setNotice(null);
+            try {
+                const response = await fetch(`/api/posts/${currentPostId}/comments`, {
+                    cache: "no-store"
+                });
+
+                if (!response.ok) {
+                    if (active) {
+                        setNotice("서버 연결이 불안정해 로컬 댓글 모드로 동작합니다.");
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                if (!active) return;
+
+                if (Array.isArray(data)) {
+                    setComments(currentPostId, data);
+                } else {
+                    setComments(currentPostId, []);
+                }
+            } catch {
+                if (active) {
+                    setNotice("네트워크 오류로 로컬 댓글 모드로 동작합니다.");
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void loadComments();
+
+        return () => {
+            active = false;
+        };
+    }, [currentPostId, setComments]);
+
+    const handleAddComment = async (payload: { author: string; content: string; parentId?: number }) => {
+        if (!currentPostId) return;
+
+        const body = {
+            content: payload.content,
+            author: payload.author,
+            parentId: payload.parentId
+        };
+
+        try {
+            const response = await fetch(`/api/posts/${currentPostId}/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const message = await getErrorMessage(response, "댓글 등록에 실패했습니다.");
+                const localComment = buildLocalComment(payload);
+                if (!localComment) {
+                    throw new Error(message);
+                }
+                addComment(currentPostId, localComment);
+                setNotice("서버 저장에 실패해 임시 로컬 댓글로 추가되었습니다.");
+                return;
+            }
+
+            const data = await response.json();
+            addComment(currentPostId, data);
+            setNotice(null);
+        } catch {
+            const localComment = buildLocalComment(payload);
+            if (!localComment) {
+                throw new Error("댓글 등록에 실패했습니다.");
+            }
+            addComment(currentPostId, localComment);
+            setNotice("네트워크 문제로 임시 로컬 댓글로 추가되었습니다.");
         }
     };
 
-    return (
-        <section id="comment-section" className="border-t border-border bg-white">
-            <div className="px-5 pb-4 pt-2">
-                <div className="flex flex-wrap gap-2">
-                    {post.tags.slice(0, 4).map(tag => (
-                        <span
-                            key={tag}
-                            className="inline-flex h-7 items-center rounded-full bg-[#f2f2f2] px-3 text-[13px] text-[#404040]"
-                        >
-                            #{tag}
-                        </span>
-                    ))}
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] bg-[#f2f2f2] text-[12px] text-[#666]">
-                        +1
-                    </span>
-                </div>
-            </div>
+    const handleLikeComment = async (commentId: number) => {
+        if (!currentPostId) return;
 
-            <div className="px-5">
-                <div className="rounded-2xl border border-[#e6e8eb] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="grid h-[52px] w-[52px] place-items-center rounded-full bg-[#eceff3] text-[20px] text-[#7a7a7a]">
-                                {post.author.charAt(0)}
+        setBusyCommentId(commentId);
+        setNotice(null);
+        try {
+            const response = await fetch(`/api/posts/${currentPostId}/comments/${commentId}/like`, {
+                method: "POST"
+            });
+
+            if (!response.ok) {
+                toggleCommentLike(currentPostId, commentId);
+                setNotice("로컬 댓글 모드에서 공감을 반영했습니다.");
+                return;
+            }
+
+            const data = await response.json();
+            if (
+                typeof data.likes === "number" &&
+                typeof data.isLiked === "boolean"
+            ) {
+                setCommentLikeState(currentPostId, commentId, data.likes, data.isLiked);
+            }
+        } catch {
+            toggleCommentLike(currentPostId, commentId);
+            setNotice("네트워크 문제로 로컬 공감으로 반영했습니다.");
+        } finally {
+            setBusyCommentId(null);
+        }
+    };
+
+    const onSubmitComment = async (payload: { author: string; content: string }) => {
+        await handleAddComment(payload);
+    };
+
+    const onSubmitReply = async (payload: { author: string; content: string; parentId: number }) => {
+        await handleAddComment(payload);
+    };
+
+    if (!post) {
+        return null;
+    }
+
+    const isVisible = post.commentsVisible ?? true;
+    const isOpen = post.commentsOpen ?? true;
+
+    if (!isVisible) {
+        return null;
+    }
+
+    return (
+        <section id="comment-section" className="border-t border-[#e9e9e9] bg-white pb-6 pt-3 md:pb-8 md:pt-4">
+            <div className="px-3.5 md:px-6">
+                <div className="mx-auto mb-2.5 h-1.5 w-10 rounded-full bg-[#d8d8d8]" />
+                <div className="mb-2.5 flex items-center gap-1.5">
+                    <MessageCircle size={18} className="text-[#202020]" />
+                    <h3 className="text-[20px] font-bold tracking-[-0.02em] text-[#101010] md:text-[22px]">
+                        댓글 <span className="text-[#03c75a]">{post.comments.length}</span>
+                    </h3>
+                </div>
+
+                {!isOpen ? (
+                    <div className="rounded-md border border-[#ececec] bg-[#fafafa] px-3 py-2 text-[12px] text-[#6f6f6f]">
+                        댓글창이 관리자에 의해 닫혀 있습니다.
+                    </div>
+                ) : null}
+
+                {!isOpen ? null : (
+                    <>
+
+                {notice && (
+                    <div className="mb-2.5 rounded-sm border border-[#e9ece7] bg-[#f8faf7] px-2.5 py-2 text-[12px] text-[#67756b]">
+                        {notice}
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="py-6 text-center text-[13px] text-[#8f8f8f]">댓글을 불러오는 중입니다.</div>
+                ) : (
+                    <CommentList
+                        comments={post.comments}
+                        onLikeComment={handleLikeComment}
+                        onAddReply={onSubmitReply}
+                        readOnly={!post.commentsEnabled}
+                        busyCommentId={busyCommentId}
+                    />
+                )}
+
+                <div className="mt-3">
+                    <CommentInput
+                        onAddComment={onSubmitComment}
+                        disabled={!post.commentsEnabled}
+                        disabledMessage="댓글이 비활성화되었습니다."
+                        placeholder="댓글을 입력해 주세요."
+                    />
+                </div>
+
+                <section className="mt-6 rounded-[10px] border border-[#ececec] bg-[#fafafa] px-3.5 py-3.5 md:hidden">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <div className="relative h-10 w-10 overflow-hidden rounded-full bg-[#e8e8e8]">
+                                {post.authorProfileImage ? (
+                                    <Image src={post.authorProfileImage} alt={post.author} fill className="object-cover" />
+                                ) : (
+                                    <span className="flex h-full w-full items-center justify-center text-[14px] font-semibold text-[#555]">
+                                        {post.author.slice(0, 1)}
+                                    </span>
+                                )}
                             </div>
                             <div>
-                                <div className="flex items-center gap-1.5 text-[15px] font-semibold text-[#111]">
-                                    <span>{post.author}</span>
-                                    <BadgeCheck size={16} className="text-primary" strokeWidth={1.8} />
-                                </div>
-                                <p className="mt-1 text-[12px] text-[#7f7f7f]">꾸준한 성장 루틴을 기록합니다.</p>
+                                <p className="text-[14px] font-semibold text-[#1b1b1b]">{post.author}</p>
+                                <p className="mt-0.5 text-[11px] text-[#8b8b8b]">일상 기록과 작업 로그</p>
                             </div>
                         </div>
-
-                        <button
-                            type="button"
-                            className="h-9 rounded-lg bg-primary px-4 text-[13px] font-semibold text-white"
-                        >
-                            이웃추가
+                        <button type="button" className="rounded-[5px] border border-[#03c75a] px-2.5 py-1 text-[11px] font-semibold text-[#03c75a]">
+                            + 이웃추가
                         </button>
                     </div>
+                </section>
 
-                    <p className="mt-3 text-[13px] leading-[1.6] text-[#4a4a4a]">
-                        매일의 실행 기록과 복기 노트를 통해 오래 가는 시스템을 만드는 방법을 공유합니다.
-                    </p>
+                {relatedPosts.length > 0 ? (
+                    <section className="mt-5 md:hidden">
+                        <div className="mb-2.5 flex items-center justify-between">
+                            <h4 className="text-[14px] font-bold text-[#111]">이 블로그의 최근 글</h4>
+                            <button type="button" className="text-[11px] text-[#777]">더보기</button>
+                        </div>
+                        <div className="space-y-2.5">
+                            {relatedPosts.slice(0, 3).map((item, index) => (
+                                <article key={item.id} className="flex items-center gap-2.5 rounded-[8px] border border-[#efefef] bg-white p-2">
+                                    <div className="relative h-[60px] w-[84px] shrink-0 overflow-hidden rounded-[6px] bg-[#f1f1f1]">
+                                        {item.headerImage ? (
+                                            <Image src={item.headerImage} alt={item.title} fill className="object-cover" />
+                                        ) : (
+                                            <Image src={FALLBACK_THUMBNAIL} alt={item.title} fill className="object-cover" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="line-clamp-2 text-[12px] font-medium leading-[1.35] text-[#202020]">{toSimpleTitle(index)}</p>
+                                        <p className="mt-1 text-[11px] text-[#8d8d8d]">{item.date}</p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
 
-                    <div className="mt-3 flex items-center gap-4 text-[12px] text-[#8a8a8a]">
-                        <span>글 412</span>
-                        <span>이웃 8,421</span>
-                        <span>구독 1,203</span>
-                    </div>
-                </div>
+                {relatedPosts.length > 0 ? (
+                    <section className="mt-5 md:hidden">
+                        <h4 className="mb-2.5 text-[14px] font-bold text-[#111]">연관 콘텐츠</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                            {relatedPosts.slice(0, 4).map((item, index) => (
+                                <article key={`${item.id}-thumb`} className="overflow-hidden rounded-[8px] border border-[#efefef] bg-white">
+                                    <div className="relative aspect-[4/3] w-full bg-[#f1f1f1]">
+                                        {item.headerImage ? (
+                                            <Image src={item.headerImage} alt={item.title} fill className="object-cover" />
+                                        ) : (
+                                            <Image src={FALLBACK_THUMBNAIL} alt={item.title} fill className="object-cover" />
+                                        )}
+                                    </div>
+                                    <div className="p-2">
+                                        <p className="line-clamp-2 text-[11px] leading-[1.3] text-[#292929]">{toSimpleTitle(index)}</p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
+
+                <div className="mt-6 text-center text-[24px] font-semibold tracking-[-0.03em] text-[#1f1f1f] md:hidden">blog</div>
+                    </>
+                )}
             </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3 px-5">
-                <button
-                    type="button"
-                    onClick={() => handleNavigatePost(previousPost?.id ?? null)}
-                    disabled={!previousPost}
-                    className={`rounded-xl border px-4 py-3 text-left ${previousPost
-                        ? "border-[#e4e4e4] bg-white"
-                        : "border-[#efefef] bg-[#fafafa] text-[#a0a0a0]"
-                        }`}
-                >
-                    <p className="text-[12px] font-semibold">이전글</p>
-                    <p className="mt-1 line-clamp-2 text-[13px] leading-[1.5]">
-                        {previousPost ? previousPost.title : "이전 글이 없습니다."}
-                    </p>
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => handleNavigatePost(nextPost?.id ?? null)}
-                    disabled={!nextPost}
-                    className={`rounded-xl border px-4 py-3 text-left ${nextPost
-                        ? "border-[#e4e4e4] bg-white"
-                        : "border-[#efefef] bg-[#fafafa] text-[#a0a0a0]"
-                        }`}
-                >
-                    <p className="text-right text-[12px] font-semibold">다음글</p>
-                    <p className="mt-1 line-clamp-2 text-right text-[13px] leading-[1.5]">
-                        {nextPost ? nextPost.title : "다음 글이 없습니다."}
-                    </p>
-                </button>
-            </div>
-
-            <div className="mt-8 px-5">
-                <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-[20px] font-semibold tracking-[-0.02em] text-[#1a1a1a]">
-                        <span className="text-primary">네이버</span> 블로그 검색 클립 더보기
-                    </h3>
-                    <ChevronRight size={22} className="text-[#1f1f1f]" />
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                    {clipCards.map(card => (
-                        <article key={card.id} className="min-w-0">
-                            <div className="relative h-[250px] overflow-hidden rounded-2xl bg-[linear-gradient(160deg,#73b8ff_0%,#3f7fd8_40%,#274f91_100%)]">
-                                <div className="absolute bottom-3 right-3 grid h-8 w-8 place-items-center rounded-full border border-white/70 bg-black/25 text-white">
-                                    <Play size={15} className="translate-x-[1px]" fill="currentColor" />
-                                </div>
-                            </div>
-
-                            <h4 className="mt-2 line-clamp-2 text-[15px] font-semibold leading-[1.4] text-[#161616]">
-                                {card.title}
-                            </h4>
-
-                            <div className="mt-1 flex items-center gap-2 text-[12px] text-[#7f7f7f]">
-                                <span>{card.time}</span>
-                                <span className="inline-flex items-center gap-1">
-                                    <Heart size={12} /> {card.likes}
-                                </span>
-                                <span className="inline-flex items-center gap-1">
-                                    <MessageCircle size={12} /> {card.comments}
-                                </span>
-                            </div>
-
-                            <div className="mt-2 flex items-center gap-2 text-[13px] text-[#6f6f6f]">
-                                <span className="grid h-5 w-5 place-items-center rounded-full border border-[#d8d8d8] bg-[#f5f5f5] text-[10px]">
-                                    팀
-                                </span>
-                                <span>{card.author}</span>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </div>
-
-            <div className="pb-10 pt-8 text-center text-[26px] tracking-[-0.02em] text-[#dddddd]">blog</div>
         </section>
     );
 }

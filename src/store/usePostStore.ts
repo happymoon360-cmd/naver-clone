@@ -37,6 +37,8 @@ export interface Post {
     isLiked: boolean;
     likeCount: number;
     commentsEnabled: boolean;
+    commentsVisible?: boolean;
+    commentsOpen?: boolean;
     createdAt?: number;
 }
 
@@ -54,9 +56,23 @@ interface PostStore {
     addComment: (postId: string, comment: Comment) => void;
     deleteComment: (postId: string, commentId: number) => void;
     toggleCommentLike: (postId: string, commentId: number) => void;
+    setCommentLikeState: (postId: string, commentId: number, likes: number, isLiked: boolean) => void;
     setCommentsEnabled: (postId: string, enabled: boolean) => void;
+    setCommentsVisible: (postId: string, visible: boolean) => void;
+    setCommentsOpen: (postId: string, open: boolean) => void;
+    updateComment: (postId: string, commentId: number, payload: Partial<Pick<Comment, "author" | "content" | "parentId">>) => void;
     setComments: (postId: string, comments: Comment[]) => void;
 }
+
+const normalizeComment = (comment: Comment): Comment => ({
+    id: Number(comment.id),
+    content: String(comment.content ?? "").trim(),
+    author: String(comment.author ?? "익명").trim() || "익명",
+    timestamp: Number.isFinite(comment.timestamp) ? comment.timestamp : Date.now(),
+    likes: Number.isFinite(comment.likes) ? Math.max(0, Math.floor(comment.likes)) : 0,
+    isLiked: typeof comment.isLiked === "boolean" ? comment.isLiked : false,
+    parentId: typeof comment.parentId === "number" && Number.isFinite(comment.parentId) ? comment.parentId : undefined
+});
 
 const parseDateValue = (value: string) => {
     const trimmed = value.trim();
@@ -95,7 +111,12 @@ const resolveCreatedAt = (post: Post) => {
 const normalizePost = (post: Post): Post => ({
     ...post,
     tags: post.tags ?? [],
+    comments: Array.isArray(post.comments) ? post.comments.map(normalizeComment) : [],
+    isLiked: typeof post.isLiked === "boolean" ? post.isLiked : false,
+    likeCount: Number.isFinite(post.likeCount) ? Math.max(0, Math.floor(post.likeCount)) : 0,
     commentsEnabled: typeof post.commentsEnabled === "boolean" ? post.commentsEnabled : true,
+    commentsVisible: typeof post.commentsVisible === "boolean" ? post.commentsVisible : true,
+    commentsOpen: typeof post.commentsOpen === "boolean" ? post.commentsOpen : true,
     createdAt: resolveCreatedAt(post)
 });
 
@@ -109,7 +130,23 @@ export const usePostStore = create<PostStore>()(
         (set) => ({
             posts: [],
             currentPostId: "",
-            setPosts: (posts) => set({ posts: ensurePosts(posts) }),
+            setPosts: (posts) => set((state) => ({
+                posts: ensurePosts(posts.map((post) => {
+                    const prev = state.posts.find(item => item.id === post.id);
+                    return normalizePost({
+                        ...post,
+                        commentsEnabled: typeof post.commentsEnabled === "boolean"
+                            ? post.commentsEnabled
+                            : prev?.commentsEnabled ?? true,
+                        commentsVisible: typeof post.commentsVisible === "boolean"
+                            ? post.commentsVisible
+                            : prev?.commentsVisible ?? true,
+                        commentsOpen: typeof post.commentsOpen === "boolean"
+                            ? post.commentsOpen
+                            : prev?.commentsOpen ?? true
+                    });
+                }))
+            })),
             setCurrentPostId: (id) => set({ currentPostId: id }),
             updatePost: (id, updatedPost) => set((state) => ({
                 posts: ensurePosts(state.posts.map((post) => {
@@ -125,6 +162,12 @@ export const usePostStore = create<PostStore>()(
                     }
                     if (updatedPost.commentsEnabled !== undefined) {
                         next.commentsEnabled = updatedPost.commentsEnabled;
+                    }
+                    if (updatedPost.commentsVisible !== undefined) {
+                        next.commentsVisible = updatedPost.commentsVisible;
+                    }
+                    if (updatedPost.commentsOpen !== undefined) {
+                        next.commentsOpen = updatedPost.commentsOpen;
                     }
                     next.createdAt = resolveCreatedAt(next);
                     return next;
@@ -163,19 +206,31 @@ export const usePostStore = create<PostStore>()(
             addComment: (postId, comment) => set((state) => ({
                 posts: state.posts.map(post => {
                     if (post.id !== postId) return post;
-                    if (!comment.content || !comment.content.trim()) return post;
+                    const nextComment = normalizeComment(comment);
+                    if (!nextComment.content) return post;
                     return {
                         ...post,
-                        comments: [comment, ...post.comments]
+                        comments: [nextComment, ...post.comments]
                     };
                 })
             })),
             deleteComment: (postId, commentId) => set((state) => ({
                 posts: state.posts.map(post => {
                     if (post.id !== postId) return post;
+                    const targetIds = new Set<number>([commentId]);
+                    let changed = true;
+                    while (changed) {
+                        changed = false;
+                        post.comments.forEach(comment => {
+                            if (comment.parentId && targetIds.has(comment.parentId) && !targetIds.has(comment.id)) {
+                                targetIds.add(comment.id);
+                                changed = true;
+                            }
+                        });
+                    }
                     return {
                         ...post,
-                        comments: post.comments.filter(c => c.id !== commentId)
+                        comments: post.comments.filter(c => !targetIds.has(c.id))
                     };
                 })
             })),
@@ -197,15 +252,67 @@ export const usePostStore = create<PostStore>()(
                     };
                 })
             })),
+            setCommentLikeState: (postId, commentId, likes, isLiked) => set((state) => ({
+                posts: state.posts.map(post => {
+                    if (post.id !== postId) return post;
+                    return {
+                        ...post,
+                        comments: post.comments.map(comment => {
+                            if (comment.id !== commentId) return comment;
+                            return {
+                                ...comment,
+                                likes: Math.max(0, Math.floor(likes)),
+                                isLiked
+                            };
+                        })
+                    };
+                })
+            })),
             setCommentsEnabled: (postId, enabled) => set((state) => ({
                 posts: ensurePosts(state.posts.map(post => post.id === postId ? normalizePost({ ...post, commentsEnabled: enabled }) : post))
+            })),
+            setCommentsVisible: (postId, visible) => set((state) => ({
+                posts: ensurePosts(state.posts.map(post => post.id === postId ? normalizePost({ ...post, commentsVisible: visible }) : post))
+            })),
+            setCommentsOpen: (postId, open) => set((state) => ({
+                posts: ensurePosts(state.posts.map(post => post.id === postId ? normalizePost({ ...post, commentsOpen: open }) : post))
+            })),
+            updateComment: (postId, commentId, payload) => set((state) => ({
+                posts: state.posts.map(post => {
+                    if (post.id !== postId) return post;
+                    return {
+                        ...post,
+                        comments: post.comments.map(comment => {
+                            if (comment.id !== commentId) return comment;
+                            const nextAuthor = payload.author !== undefined
+                                ? (String(payload.author).trim() || comment.author)
+                                : comment.author;
+                            const nextContent = payload.content !== undefined
+                                ? (String(payload.content).trim() || comment.content)
+                                : comment.content;
+                            const nextParent = payload.parentId !== undefined
+                                ? payload.parentId
+                                : comment.parentId;
+                            return {
+                                ...comment,
+                                author: nextAuthor,
+                                content: nextContent,
+                                parentId: nextParent
+                            };
+                        })
+                    };
+                })
             })),
             setComments: (postId, comments) => set((state) => ({
                 posts: state.posts.map(post => {
                     if (post.id !== postId) return post;
                     return {
                         ...post,
-                        comments: comments
+                        comments: Array.isArray(comments)
+                            ? comments
+                                .map(normalizeComment)
+                                .sort((a, b) => b.timestamp - a.timestamp)
+                            : []
                     };
                 })
             }))
