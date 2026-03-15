@@ -1076,6 +1076,7 @@ export default function AdminPage() {
                                             </h1>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-full overflow-hidden border border-white/30">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                                     <img src={form.authorProfileImage || DEFAULT_AUTHOR_IMAGE} alt="Profile" />
                                                 </div>
                                                 <div className="flex flex-col text-[11px] leading-tight">
@@ -1271,6 +1272,7 @@ export default function AdminPage() {
                                             </h1>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-full overflow-hidden border border-white/30">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                                     <img src={editForm.authorProfileImage || DEFAULT_AUTHOR_IMAGE} alt="Profile" />
                                                 </div>
                                                 <div className="flex flex-col text-[11px] leading-tight">
@@ -1307,6 +1309,7 @@ export default function AdminPage() {
                                     <li className="group flex flex-col items-start justify-between gap-3 p-4 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center">
                                         <div className="flex items-center gap-3 sm:gap-4">
                                             <div className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img src={post.headerImage} alt="" className="w-full h-full object-cover" />
                                             </div>
                                             <div>
