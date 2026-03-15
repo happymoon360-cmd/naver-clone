@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { usePostStore } from "@/store/usePostStore";
-import { FALLBACK_THUMBNAIL, toSimpleTitle } from "@/lib/blogConstants";
 import { blogConfig } from "@/lib/blogConfig";
 import ProductWidget from "./ProductWidget";
 
@@ -46,13 +45,15 @@ export default function PostSidebar() {
                         <button type="button" className="text-[11px] text-[#777]">더보기</button>
                     </div>
                     <div className="space-y-2.5">
-                        {relatedPosts.slice(0, 3).map((item, index) => (
+                        {relatedPosts.slice(0, 3).map(item => (
                             <article key={item.id} className="flex items-center gap-2 rounded-[8px] border border-[#efefef] bg-white p-2">
-                                <div className="relative h-[56px] w-[78px] shrink-0 overflow-hidden rounded-[6px] bg-[#f1f1f1]">
-                                    <Image src={item.headerImage || FALLBACK_THUMBNAIL} alt={item.title} fill className="object-cover" />
-                                </div>
+                                {item.headerImage ? (
+                                    <div className="relative h-[56px] w-[78px] shrink-0 overflow-hidden rounded-[6px] bg-[#f1f1f1]">
+                                        <Image src={item.headerImage} alt={item.title} fill className="object-cover" />
+                                    </div>
+                                ) : null}
                                 <div className="min-w-0 flex-1">
-                                    <p className="line-clamp-2 text-[12px] font-medium leading-[1.35] text-[#202020]">{toSimpleTitle(index)}</p>
+                                    <p className="line-clamp-2 text-[12px] font-medium leading-[1.35] text-[#202020]">{item.title}</p>
                                     <p className="mt-1 text-[11px] text-[#8d8d8d]">{item.date}</p>
                                 </div>
                             </article>
@@ -63,13 +64,10 @@ export default function PostSidebar() {
                 <section className="mt-4 rounded-[12px] border border-[#e8e8e8] bg-white p-4">
                     <h4 className="mb-2.5 text-[14px] font-bold text-[#111]">관련 글</h4>
                     <div className="grid grid-cols-2 gap-2">
-                        {relatedPosts.slice(0, 4).map((item, index) => (
+                        {relatedPosts.slice(0, 4).map(item => (
                             <article key={`${item.id}-thumb`} className="overflow-hidden rounded-[8px] border border-[#efefef] bg-white">
-                                <div className="relative aspect-[4/3] w-full bg-[#f1f1f1]">
-                                    <Image src={item.headerImage || FALLBACK_THUMBNAIL} alt={item.title} fill className="object-cover" />
-                                </div>
                                 <div className="p-2">
-                                    <p className="line-clamp-2 text-[11px] leading-[1.3] text-[#292929]">{toSimpleTitle(index)}</p>
+                                    <p className="line-clamp-2 text-[11px] leading-[1.3] text-[#292929]">{item.title}</p>
                                 </div>
                             </article>
                         ))}

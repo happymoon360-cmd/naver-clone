@@ -12,19 +12,15 @@ export default function PostHeader() {
 
     if (!post) return null;
 
-    const postIndex = Math.max(1, posts.findIndex(item => item.id === post.id) + 1);
-    const displayCategory = "카테고리";
-    const displayTitle = `포스트 제목 ${String(postIndex).padStart(2, "0")}`;
-
     const hasProfileImage = post.authorProfileImage.trim().length > 0;
 
     return (
         <section className="bg-white">
             <div className="px-3.5 pb-3.5 pt-3.5">
-                <p className="text-[12px] font-normal text-[#666]">{displayCategory}</p>
+                <p className="text-[12px] font-normal text-[#666]">{post.category}</p>
 
                 <h1 className="mt-2 text-[27px] font-extrabold leading-[1.3] tracking-[-0.03em] text-[#101010]">
-                    {displayTitle}
+                    {post.title}
                 </h1>
 
                 <div className="mt-4.5 flex items-center justify-between gap-3">
