@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { blogConfig } from "@/lib/blogConfig";
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -10,7 +11,7 @@ export default function Footer() {
                     Made with ❤️ and coffee
                 </div>
                 <div className="text-xs text-text-light mb-2">
-                    © {currentYear} My Blog. All rights reserved.
+                    © {currentYear} {blogConfig.name}. All rights reserved.
                 </div>
                 <div className="text-xs">
                     <Link href="/admin" className="text-gray-300 hover:text-text-light transition-colors">

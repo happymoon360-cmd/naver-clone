@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { blogConfig } from '@/lib/blogConfig';
 
 export type BlockType = 'text' | 'image' | 'quote' | 'line' | 'html';
 
@@ -318,7 +319,7 @@ export const usePostStore = create<PostStore>()(
             }))
         }),
         {
-            name: 'mybestie-posts',
+            name: blogConfig.storageKey,
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.posts = ensurePosts(state.posts ?? []);
@@ -330,7 +331,7 @@ export const usePostStore = create<PostStore>()(
 
 if (typeof window !== "undefined") {
     window.addEventListener("storage", (event) => {
-        if (event.key !== "mybestie-posts" || !event.newValue) return;
+        if (event.key !== blogConfig.storageKey || !event.newValue) return;
         try {
             const data = JSON.parse(event.newValue);
             const nextPosts = data?.state?.posts;
