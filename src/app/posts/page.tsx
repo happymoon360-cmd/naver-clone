@@ -1,41 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Container from "@/components/layout/Container";
 import { getStaticPosts } from "@/lib/blogConstants";
 
-interface Post {
-  id: string;
-  title: string;
-  category: string;
-  date: string;
-  author: string;
-  authorProfileImage: string;
-  headerImage: string;
-  tags: string[];
-  createdAt?: number;
-}
-
 const POSTS_PER_PAGE = 10;
+const getInitial = (value: string) => value.trim().charAt(0) || "B";
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const posts = useMemo(() => getStaticPosts(), []);
+  const categories = useMemo(() => [...new Set(posts.map(p => p.category))], [posts]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const staticPosts = getStaticPosts();
-    setPosts(staticPosts);
-    const uniqueCategories = [...new Set(staticPosts.map(p => p.category))];
-    setCategories(uniqueCategories);
-    setLoading(false);
-  }, []);
 
   const filteredPosts = useMemo(() => {
     let result = posts;
@@ -68,16 +48,6 @@ export default function PostsPage() {
     setSelectedCategory(value);
     setCurrentPage(1);
   };
-
-  if (loading) {
-    return (
-      <Container>
-        <div className="flex items-center justify-center py-20">
-          <div className="text-gray-500">로딩 중...</div>
-        </div>
-      </Container>
-    );
-  }
 
   return (
     <Container>
@@ -123,20 +93,26 @@ export default function PostsPage() {
                   className="block overflow-hidden rounded-lg border border-border bg-white transition-shadow hover:shadow-md"
                 >
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative h-32 w-full flex-shrink-0 sm:h-auto sm:w-48">
-                      <Image src={post.headerImage || "/file.svg"} alt={post.title} fill className="object-cover" />
-                    </div>
+                    {post.headerImage ? (
+                      <div className="relative h-32 w-full flex-shrink-0 sm:h-auto sm:w-48">
+                        <Image src={post.headerImage} alt={post.title} fill className="object-cover" />
+                      </div>
+                    ) : null}
                     <div className="flex-1 p-4">
                       <div className="mb-1 text-xs font-medium text-primary">{post.category}</div>
                       <h2 className="mb-2 line-clamp-2 text-lg font-semibold text-text">{post.title}</h2>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <div className="relative h-5 w-5 overflow-hidden rounded-full">
-                          <Image
-                            src={post.authorProfileImage || "/file.svg"}
-                            alt={post.author}
-                            fill
-                            className="object-cover"
-                          />
+                        <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-[10px] font-semibold text-gray-600">
+                          {post.authorProfileImage ? (
+                            <Image
+                              src={post.authorProfileImage}
+                              alt={post.author}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            getInitial(post.author)
+                          )}
                         </div>
                         <span>{post.author}</span>
                         <span>·</span>
