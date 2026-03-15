@@ -87,16 +87,28 @@ export const postsBlogB: Post[] = [
     headerImage: '',
     tags: ['다이소 방향제 추천', '방향제 추천', '차량 방향제', '남편 차'],
     content: [
-      { id: 'b004-1', type: 'text', content: '남편 차 냄새가 좀 신경 쓰여서 다이소 방향제를 먼저 사봤거든요. 가격이 가볍고 구하기 쉬워서 테스트용으로는 좋았어요.' },
-      { id: 'b004-3', type: 'text', content: '그런데 향이 생각보다 빨리 빠지더라고요. 처음엔 괜찮다가 며칠 지나면 거의 안 느껴져서 좀 아쉬웠어요.' },
-      { id: 'b004-4', type: 'text', content: '그래서 요즘은 햇빛 들면 움직이는 타입으로 바꿔뒀는데, 선이 안 보여서 더 깔끔하고 향도 은은하게 오래가서 남편 차에는 이쪽이 더 맞았습니다.' },
-      { id: 'b004-6', type: 'text', content: '다이소 쪽은 짧게 써보기 좋고, 오래 둘 거면 지금 쓰는 쪽이 편했어요. 남편 차처럼 물건 많은 차엔 덜 복잡한 게 제일이더라고요.' },
+      // Act 1: Hook
+      { id: 'b004-1', type: 'text', content: '남편 차 탈 때마다 은근 냄새가 신경 쓰이거든요. 환기를 해도 금방 다시 올라오니까, 결국 다이소 방향제를 먼저 사봤어요. 천 원도 안 하니까 일단 테스트용으로 써보자 싶었거든요.' },
+      { id: 'b004-2', type: 'image', src: '/posts/b-004-01.jpg', caption: '다이소에서 사 온 차량용 방향제' },
+      // Act 2: 시도
+      { id: 'b004-3', type: 'text', content: '고체 타입으로 하나 집어왔는데, 남편 차 송풍구에 끼우는 거였어요. 달아주면서 "이거 한번 써봐" 했더니 남편이 신기해하더라고요.' },
+      { id: 'b004-4', type: 'text', content: '처음엔 남편이 "오 향 괜찮은데?" 하면서 좋아했어요. 차 탈 때마다 은은하게 나니까 저도 옆에서 기분이 좋았거든요 ㅎㅎ' },
+      // Act 3: 실패
+      { id: 'b004-5', type: 'text', content: '근데 일주일 지나니까 거의 무향이더라고요. 코 가까이 대야 겨우 나는 수준이었어요. 남편도 "이거 향 다 날아간 것 같은데?" 하고, 저도 좀 아쉬웠어요. 가격이 가격이니까 어쩔 수 없나 싶으면서도요.' },
+      { id: 'b004-6', type: 'image', src: '/posts/b-004-02.jpg', caption: '남편 차 대시보드에 올려둔 모습' },
+      // Act 4: 발견
+      { id: 'b004-7', type: 'text', content: '그러다 우연히 본 건데, 햇빛 받으면 알아서 돌아가는 타입이 있더라고요. 선도 없고 배터리도 필요 없어서 대시보드에 올려두기만 하면 되는 거예요. 거기다 주차번호판 겸용이라 따로 달 필요도 없고, 깔끔하더라고요.' },
+      { id: 'b004-8', type: 'image', src: '/posts/b-004-03.jpg', caption: '지금 남편 차에 올려둔 방향제' },
+      // Act 5: 만족 + 정리
+      { id: 'b004-9', type: 'text', content: '바꾼 지 2주 정도 됐는데, 향이 은은하게 계속 유지되고 있어요. 남편이 직접 닦고 관리하는 거 보면 마음에 든 거 맞는 거죠 ㅎㅎ' },
+      { id: 'b004-10', type: 'text', content: '다이소 방향제가 나쁜 건 아니에요. 가볍게 테스트해보기엔 좋은데, 오래 쓸 거면 다른 선택지도 같이 보시는 게 낫더라고요.' },
     ],
     comments: [
-      { id: 1, content: '남편 차에 어떤 거 올려놓으셨어요?', author: '살림메모', timestamp: Date.now() - 9 * 86400000 + 3 * 3600000, likes: 3, isLiked: false },
-      { id: 2, content: '햇빛 받으면 돌아가고 번호 보는 기능도 같이 있는 타입이에요~ 저는 여기서 봤어요. https://sjhur3601.cafe24.com/', author: '살림하는엄마', timestamp: Date.now() - 9 * 86400000 + 5 * 3600000, likes: 1, isLiked: false, parentId: 1 },
-      { id: 3, content: '향 오래가면 저도 바꿔보고 싶네요.', author: '엄마의시간', timestamp: Date.now() - 8 * 86400000 + 1 * 3600000, likes: 1, isLiked: false },
-      { id: 4, content: '저희 집은 만족했어요 ㅎㅎ 링크 같이 남겨둘게요. https://sjhur3601.cafe24.com/', author: '살림하는엄마', timestamp: Date.now() - 8 * 86400000 + 4 * 3600000, likes: 0, isLiked: false, parentId: 3 },
+      { id: 1, content: '다이소 방향제 저도 써봤는데 진짜 일주일이면 끝이에요 ㅠㅠ', author: '꽃피는날', timestamp: Date.now() - 9 * 86400000 + 4 * 3600000, likes: 4, isLiked: false },
+      { id: 2, content: '맞아요~ 처음엔 괜찮은데 금방 날아가더라고요 ㅎㅎ', author: '살림하는엄마', timestamp: Date.now() - 9 * 86400000 + 6 * 3600000, likes: 1, isLiked: false, parentId: 1 },
+      { id: 3, content: '혹시 지금 쓰시는 거 어디서 구매하셨어요? 선 없는 거 찾고 있었거든요', author: '차안이좋아', timestamp: Date.now() - 8 * 86400000 + 2 * 3600000, likes: 2, isLiked: false },
+      { id: 4, content: '여기서 봤어요~ https://sjhur3601.cafe24.com/ 번호판 겸용이라 깔끔해요', author: '살림하는엄마', timestamp: Date.now() - 8 * 86400000 + 5 * 3600000, likes: 1, isLiked: false, parentId: 3 },
+      { id: 5, content: '남편한테 보여줬더니 본인이 직접 사겠대요 ㅋㅋ', author: '두아이맘', timestamp: Date.now() - 7 * 86400000 + 1 * 3600000, likes: 3, isLiked: false },
     ],
     isLiked: false,
     likeCount: 16,
