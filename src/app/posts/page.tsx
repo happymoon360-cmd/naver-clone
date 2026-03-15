@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Container from "@/components/layout/Container";
+import { getStaticPosts } from "@/lib/blogConstants";
 
 interface Post {
   id: string;
@@ -15,7 +16,7 @@ interface Post {
   authorProfileImage: string;
   headerImage: string;
   tags: string[];
-  createdAt: number;
+  createdAt?: number;
 }
 
 const POSTS_PER_PAGE = 10;
@@ -29,16 +30,11 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/posts")
-      .then(res => res.json())
-      .then(data => {
-        const postsData = data as Post[];
-        setPosts(postsData);
-        const uniqueCategories = [...new Set(postsData.map(p => p.category))];
-        setCategories(uniqueCategories);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const staticPosts = getStaticPosts();
+    setPosts(staticPosts);
+    const uniqueCategories = [...new Set(staticPosts.map(p => p.category))];
+    setCategories(uniqueCategories);
+    setLoading(false);
   }, []);
 
   const filteredPosts = useMemo(() => {

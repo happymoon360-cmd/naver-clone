@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { usePostStore } from "@/store/usePostStore";
 import { FALLBACK_THUMBNAIL, toSimpleTitle } from "@/lib/blogConstants";
+import { blogConfig } from "@/lib/blogConfig";
+import ProductWidget from "./ProductWidget";
 
 export default function MobileSidebar() {
     const { posts, currentPostId } = usePostStore();
@@ -28,7 +30,7 @@ export default function MobileSidebar() {
                         </div>
                         <div>
                             <p className="text-[14px] font-semibold text-[#1b1b1b]">{post.author}</p>
-                            <p className="mt-0.5 text-[11px] text-[#8b8b8b]">mybestie</p>
+                            <p className="mt-0.5 text-[11px] text-[#8b8b8b]">{blogConfig.name}</p>
                         </div>
                     </div>
                     <button type="button" className="rounded-[5px] border border-primary px-2.5 py-1 text-[11px] font-semibold text-primary">
@@ -84,6 +86,8 @@ export default function MobileSidebar() {
                     ))}
                 </div>
             </section>
+
+            <ProductWidget />
         </>
     );
 }
