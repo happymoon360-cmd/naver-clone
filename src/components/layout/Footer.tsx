@@ -18,6 +18,9 @@ export default function Footer() {
                         Admin
                     </Link>
                 </div>
+                <p className="mt-2 text-[10px] text-[#b0b0b0]">
+                    이 블로그의 일부 게시물에는 제휴 링크가 포함되어 있습니다.
+                </p>
             </div>
         </footer>
     );
