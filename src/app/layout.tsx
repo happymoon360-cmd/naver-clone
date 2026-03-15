@@ -17,6 +17,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="min-h-screen bg-[#f4f5f6] text-text antialiased">
+        <style dangerouslySetInnerHTML={{ __html: `
+  :root {
+    --color-primary: ${blogConfig.colors.primary};
+    --color-primary-hover: ${blogConfig.colors.primaryHover};
+  }
+`}} />
         <MetaPixel />
         <div className="mx-auto flex min-h-screen w-full flex-col">
           <MobileHeader />

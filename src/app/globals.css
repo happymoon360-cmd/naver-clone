@@ -47,7 +47,7 @@
   }
 
   .article-html a {
-    color: #0ea5e9;
+    color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
