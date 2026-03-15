@@ -12,9 +12,6 @@ export default function PostBody() {
 
     if (!post) return <div className="px-4 py-8 text-center text-[#888]">Post not found</div>;
 
-    const stripHtml = (value: string) => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-    const textPool = ["본문 텍스트", "디자인 샘플", "레이아웃 확인", "구성 확인 문장"];
-    const compactText = (seed: string) => textPool[seed.length % textPool.length];
     const fallbackImages = [
         "https://picsum.photos/seed/bestie-inline-1/1200/900",
         "https://picsum.photos/seed/bestie-inline-2/1200/900",
@@ -24,9 +21,9 @@ export default function PostBody() {
     const renderBlock = (block: ContentBlock) => {
         switch (block.type as BlockType) {
             case "text":
-                return <SeText key={block.id}>{compactText(block.id)}</SeText>;
+                return <SeText key={block.id}>{block.content ?? ""}</SeText>;
             case "html":
-                return <SeText key={block.id}>{compactText(stripHtml(block.content ?? "") + block.id)}</SeText>;
+                return <SeText key={block.id}>{block.content ?? ""}</SeText>;
             case "image":
                 if (!block.src) return null;
                 return (
@@ -39,7 +36,7 @@ export default function PostBody() {
                     />
                 );
             case "quote":
-                return <SeQuote key={block.id}>{"강조 문장"}</SeQuote>;
+                return <SeQuote key={block.id}>{block.content ?? ""}</SeQuote>;
             case "line":
                 return <SeLine key={block.id} />;
             default:
